@@ -1,0 +1,78 @@
+section
+  section
+    img(src="img/express.png")
+  section
+    h4 hello world
+    hr
+    pre
+      code(class="js").
+        const express = require("express");
+        const app = express();
+        const options = { port: 3000 };
+
+        app.get("/", function(req, res) {
+          res.send("Hello World\n");
+        });
+
+        app.listen(
+          options,
+          () => console.log(`Listening on ${options.port}`)
+        );
+    p(class="fragment") app.METHOD(path, callback [, callback ...])
+    pre(class="fragment")
+      code.
+        app.post("/api", function(req, res, next) {
+          console.log(`${req.method} - ${req.url}`);
+          next();
+        }, function(req, res) {
+          res.json({ data: true });
+        });
+    aside(class="notes")
+      ul
+        li son handler'da next() yok
+  section
+    h3 middleware ekleme
+    hr
+    p /api kapsamında olan bir middleware ekledik - global mw için;
+    pre
+      code(class="js").
+        app.use(function (req, res, next) {
+          console.log(`${req.method} - ${req.url}`);
+          next();
+        });
+    pre
+      code(class="fragment js") app.use(express.static("public", options));
+      code(class="fragment js") app.use(morgan("combined"));
+    div(class="compact")
+      p(class="fragment") middleware'ların sırası önemli - tanımlandıkları sırayla işlenirler
+      p(class="fragment question") app.use() ile global olarak tanımladığımız mw'ı app.listen() öncesindeki satıra alırsak ne oluyor?
+      p(class="fragment question") /api route'u içinde tanımladığımız mw'ı son sıraya alırsak ne oluyor?
+    aside(class="notes")
+      ul
+        li
+  section
+    p req.body objesi JSON ise, JSON.parse(req.body) yapmanız gerekir - there is a mw for that
+    pre
+      code(class="js") app.use(bodyParser.json());
+    pre(class="fragment")
+      code.
+        app.post("/api", function(req, res) {
+          // const { val } = JSON.parse(req.body);
+          const { val } = req.body;
+
+          res.json({ val: Number(val) * 2 });
+        });
+    div(class="fragment")
+      p eğer sunucu ile form-urlencoded haberleşeceksek;
+      pre
+        code(class="js") bodyParser.urlencoded({ extended: false });
+    aside(class="notes")
+      ul
+        li 
+
+  section
+    h3 express.Router
+    hr
+    ul
+      li(class="fragment") mw'lar ve route'lardan (/api) oluşan, izole edilmiş bir mini express app
+      li(class="fragment") asda

@@ -1,0 +1,245 @@
+section
+  section
+    img(src="img/node_logo.svg")
+  section
+    h3 nedir?
+    hr
+    ul
+      li 2009 yılından beri
+        a(href="https://gitshub.com/nodejs/node/releases")  açık kaynak
+        |  kodlu bir proje. 2015 yılından beri bir
+        a(href="https://foundation.nodejs.org/")  vakıf
+      li(class="fragment") Ryan Dahl, JS kullanarak sistem programlama yapmak amacıyla, Google'ın V8 motorunu ve bir takım C kütüphanesini bir araya getiriyor.
+      li(class="fragment") Olay güdümlü bir mimarisi ve asenkron I/O kabiliyeti var
+      li(class="fragment") Bu nedenle, özellikle web uygulamalarında, oldukça verimli ve doğal olarak ölçeklenebilir
+    aside(class="notes")
+      ul
+        li
+          a(href="https://foundation.nodejs.org/about/members") members
+        li high throughput & naturally scalable
+  section
+    h4 organizasyon
+    hr
+    p
+     a(href="https://nodejs.org/en/about/governance/") TSC
+     |  tarafından yönetilir. Komite, her hafta toplanır. Toplantı kayıtlarını youtube'da
+     a(href="https://www.youtube.com/watch?v=jX_FFG-XC_E&list=PLfMzBWSH11xYFLA1Ld9vFNccwoHW-XFn6")   bulabilirsiniz.
+    p(class="fragment") 6 ayda bir master branch'ten release alınır. Çift sayılı sürümler (v4, v6) LTS sürecine girer. Bu, sürümün 18 ay boyunca aktif destek alacağını belirtir. Tek sayılı sürümler ise bir sonraki LTS sürümüne hazırlıktır.
+    div(class="fragment")
+      p 18 aylık aktif destek sonrasında, LTS sürümü 12 aylık bakım desteğine girer.
+      img(src="img/nodejs_releases.png" height=200)
+    aside(class="notes")
+      ul
+        li.
+          An active version receives non-breaking backports of changes a few weeks after they land in the current release. A maintenance release only receives critical fixes and documentation updates
+  section
+    h4 mimari
+    hr
+    ul
+      li ares, DNS operasyonları için
+      li libuv, event loop/queue mekanizması için
+      li zlib, veri sıkıştırması için (gzip)
+    img(src="img/nodejs_arch.png" height=250)
+    ul(class="fragment")
+      li(style="font-size:.5em;") process'in tek bir (multi olası) thread'i vardır. event loop sayesinde asenkron işlemler gerçekleştirir
+      li(class="fragment" style="font-size:.5em;") olay (event) güdümlü mimari bir çok uygulama türü için ideal - özellikle http(s) protokol temelliler
+    aside(class="notes")
+      ul
+        li asenkron = bloklanmaz
+        li offloading operations to the system kernel whenever possible
+  section
+    h4 event loop/queue
+    hr
+    ul
+      li callback/event handler fonksiyonlar sıraya alınır
+      li(class="fragment") fazlara (6-8) ayrılmıştır - aktif fazla ilgili cb'ler sıradan tüketilir
+    img(src="img/event-loop.png" height="250px")
+    ul(class="fragment")
+      li sıradan alınan cb, havuzdaki thread/worker'lardan bir tanesi tarafından
+       b  senkron
+       |  olarak çalıştırılır
+      li(class="fragment") cb içerisinde bir başka asenkron işlem sıraya alınmış olabilir
+    aside(class="notes")
+      ul
+        li diff of process.nextTick() and setImmediate() is nextTick() defers the execution of an action till the next pass around the event loop or it simply calls the callback function once the ongoing execution of the event loop is finished whereas setImmediate() executes a callback on the next cycle of the event loop and it gives back to the event loop for executing any I/O operations.
+        li a node app handles multiple concurrent clients
+        li http(s) web server arch is request/response
+  section
+    h4 bir node.js uygulaması çalıştığında;
+    hr
+    ol
+      li boş bir event loop oluşturur
+      li script'teki senkron işlemleri yapar
+      li I/O, timer veya process.nextTick() ile kurulmuş asenkron işlemler sıraya (queue) alınır
+      li olay döngüsü, sıraya alınacak callback olduğu sürece uygulamayı açık tutar
+      li loop'ta callback kalmadığında (handle edilecek bir olay kalmadığında) uygulama kapanır
+    pre(class="fragment")
+      code.
+        while (queue.waitForMessage()) {
+          queue.processNextMessage();
+        }
+  aside(class="notes")
+    ul
+      li going back to the event loop
+  section
+    h3 CLI kullanımı
+    hr
+    pre
+      code(class="sh").
+        > node -e "console.log(2+2)"
+        > node -p process.version
+        > node -p process.versions
+        > node -p "process.cwd()"
+        > node -p "path.basename(process.cwd())"
+        > node -p "path.dirname(process.cwd())"
+        > node -h
+    div(class="fragment")
+      pre
+        code(class="sh").
+          > node -e 'dns.lookup("www.google.com", console.log)'
+      a(href="http://devdocs.io/node/dns#dns_dns_lookup_hostname_options_callback") devdocs.io/dns.lookup
+    aside(class="notes").
+      GLOBAL.process.cwd === process.cwd
+  section
+    h3 API kullanımı
+    hr
+    pre
+      code(class="js").
+        const fs = require("fs");
+
+        console.log(readSync("./package.json"));
+
+        function readSync(filePath) {
+          const contents = fs.readFileSync(filePath);
+
+          return contents;
+        }
+    p(flex="dir:top main:top" class="fragment question") Dosya içeriği Buffer olarak log'landı. Bunu nasıl insanın anlayacağı şekilde log'larız?
+      br
+      a(href="http://devdocs.io/node/fs#fs_fs_readfilesync_path_options")  devdocs.io/fs.readFileSync
+  section
+    h3 sertifikasyon
+    hr
+    p Node.js ve Linux vakıflarının işbirliğiyle bir sertifikasyon süreci tasarlanıyor.
+      a(href="https://foundation.nodejs.org/resources/certification")  Node.js Certified Developer (NCD)
+      |  programı, Temmuz 2018 itibariyle alpha safhasında.
+    p(class="fragment") Sınavın resmi tanımı şöyle;
+      q It is an online, proctored, performance-based test that requires solving topic domains from a command line.
+    p(class="fragment")
+      a(href="https://github.com/nodejs-certified-developer/certification") GH reposunda
+      |  daha fazla detay bulabilirsiniz.
+  section
+    img(src="img/npm_logo.png")
+  section
+    h3 nedir?
+    hr
+    ul
+      li JS ekosisteminin resmi paket yöneticisi
+      li Temmuz 2018'de, ECMA Int. bünyesine
+        a(href="https://blog.npmjs.org/post/175722319045/npm-joins-ecma-international-and-tc39")  katıldı
+        |  ve TC39 komitesinde temsil edilmeye başlandı
+      div(flex="dir:top cross:center" class="fragment")
+        img(src="./img/modulecounts.png" width=500)
+        a(href="http://www.modulecounts.com/")
+          small modulecounts.com
+  section
+    h3 CLI
+    hr
+    pre
+      code(class="sh").
+        > npm -l
+        > npm bin # --global
+        > npm config ls
+    pre(class="fragment")
+      code(class="sh").
+        > npm config get prefix
+        > npm config ls -l
+        > npm config set init-license MIT
+    pre(class="fragment")
+      code(class="sh").
+        > npm show express # aliases: v, info, show
+        > npm v express dependencies
+    pre(class="fragment")
+      code(class="sh").
+        > npm v express@4.9
+        > npm v express@4.9 dependencies.qs
+  section
+    h3 package.json
+    hr
+    div(class="compact")
+      pre
+        code(class="json").
+          "scripts": {
+            "start": "node server.js",
+            "lint": "eslint server.js"
+          }
+      pre
+        code(class="sh").
+          > npm start
+          > npm run lint
+    pre(class="fragment")
+      code(class="json").
+        "config": {
+          "port": 3000,
+          "auth": { "user": "admin" }
+        },
+        "scripts": {
+          "start": "node server.js -p $npm_package_config_port",
+          "other": "node server.js -u $npm_package_config_auth_user",
+        }
+    p(class="fragment") $npm_package değişkenleri sadece "scripts" kapsamında var
+
+  section
+    p eğer komut run-script olarak çalıştırılmışsa (ör: npm run serve), process.env objesine npm_package değişkenleri eklenir
+    pre
+      code(class="js") console.log(`Port: ${process.env.npm_package_config_port}`);
+    pre(class="fragment")
+      code(class="sh").
+        > npm config set myApp:port 1337 # myApp -> package.name
+        > npm config set myApp:auth_user other_user
+    ul(class="compact")
+      li(class="fragment") run-script ile çalıştırılan komutlar, .bin klasörünüzü PATH'e ekler
+      li(class="fragment") run-script'lerin hepsi (olan ve ekledikleriniz) için pre/post var
+    pre(class="fragment")
+      code(class="json").
+        "scripts": {
+          "prestart": "echo START",
+          "start": "node server.js",
+          "poststart": "echo FINISH",
+        }
+    //- div(class="fragment")
+    //-   ul
+    //-     li run-script'lere argüman vermek için --
+    //-   pre
+    //-     code(class="json").
+    //-       "scripts": {
+    //-         "lint": "eslint server.js",
+    //-         "fix": "npm run lint -- --fix"
+    //-       }
+  section
+    h3 bağlantılar
+    hr
+    span
+      a(href="https://stackoverflow.com/tags/node.js/info") SO node.js wiki
+    br
+    span
+      a(href="https://github.com/substack/stream-handbook") stream handbook
+    br
+    span
+      a(href="https://www.joyent.com/node-js/production") production practices by Joyent
+    br
+    span
+      a(href="https://github.com/sindresorhus/awesome-nodejs") awesome node.js
+    br
+    span
+      a(href="https://github.com/sindresorhus/awesome-npm") awesome npm
+    br
+    span
+      a(href="https://nodejs.org/en/docs/guides/event-loop-timers-and-nexttick/") The Node.js Event Loop, Timers, and process.nextTick()
+    br
+    span
+      a(href="https://www.youtube.com/watch?v=P9csgxBgaZ8") Node's Event Loop From the Inside Out
+    br
+    span
+      a(href="https://nodejs.org/en/docs/guides/dont-block-the-event-loop/") Don't Block the Event Loop
+    br

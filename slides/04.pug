@@ -1,0 +1,133 @@
+section
+  section(flex="main:center cross:center")
+    h5 node.js http sunucusu
+    div
+      img(
+        src="img/ninja_adventure.gif"
+        style="align-self: flex-start"
+      )
+    small
+      a(href="http://gph.is/1QXgT7p") © Volkan Aydemir
+  section
+    h4 http modülü
+    hr
+    pre
+      code(class="sh").
+        > node -p "http.METHODS"
+        > node -p "http.STATUS_CODES"
+    div(class="fragment")
+      span(style="font-size:.7em;")
+        a(src="https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview") http protokolünde
+        |  belirlenen request/response mimarisi
+      pre
+        code(class="js").
+          const server = http.createServer(function(request, response) {
+            // magic happens here!
+          });
+    pre(class="fragment")
+      code(class="js").
+        const server = http.createServer();
+        server.on("request", function(request, response) {
+          // the same kind of magic happens here!
+        });
+  section
+    h4 http-server.js
+    hr
+    pre
+      code(class="js").
+        const http = require("http");
+        const options = { port: 3000 };
+
+        const server = http.createServer(function(req, res) {
+          res.statusCode = 200;
+          res.setHeader("Content-Type", "text/plain");
+          res.end("Hello World\n");
+        });
+
+        server.listen(options, () => {
+          console.log(`Listening on port ${options.port}`);
+        });
+    a(href="http://devdocs.io/node/http#http_http_createserver_options_requestlistener") devdocs.io/http.createServer
+    pre(class="fragment")
+      code(class="sh") > curl localhost:3000
+    pre(class="fragment")
+      code(class="js") http.createServer(function(req, res) {}).listen(3000);
+  section
+    h4 hata ayıklama
+    hr
+    pre
+      code(class="js").
+        const server = http.createServer(function(req, res) {
+          <mark>debugger;</mark>
+          res.statusCode = 200;
+          .
+          .
+    pre
+      code(class="sh") > node --inspect http-server.js
+    a(
+      href="https://nodejs.org/en/docs/guides/debugging-getting-started/#chrome-devtools-55"
+      class="fragment"
+    ) chrome://inspect
+    pre(class="fragment")
+      code(class="sh") > curl -I localhost:3000
+    pre(class="fragment")
+      code(class="sh") > node --inspect-brk http-server.js
+    p(class="fragment question") request ve response objelerini incele - breakpoint'te durduğunda response'a müdahale edebiliyor musun? - handler içinde this ne?
+    aside(class="notes")
+  section middleware ekleme
+    pre
+      code(class="sh") > npm repo morgan # vanilla http server
+    pre(class="fragment")
+      code(class="js").
+        http.createServer(handler).listen(3001);
+
+        function handler(req, res) {
+          const done = finalhandler(req, res);
+          logger(req, res, function(err) {
+            if (err) return done(err);
+
+            res.statusCode = 200;
+            res.setHeader("Content-Type", "text/plain");
+            res.end("Hello World\n");
+          });
+        }
+    p(class="fragment question") res.end() ile cevap dönmezsek ne oluyor?
+    p(class="fragment question") logger(req, res, done) yaparsak ne oluyor?
+  section
+    h4 file-server.js
+    hr
+    pre
+      code(class="js").
+        http.createServer(function(req, res) {
+          const filePath = "." + req.url;
+          fs.exists(filePath, exists => {
+            if (exists) {
+              fs.readFile(filePath, (err, data) => {
+                if (!err) {
+                  res.statusCode = 200;
+                  res.end(data);
+                }
+              });
+            }
+          });
+        }).listen(3000);
+    ul(class="fragment compact")
+      li index.html ?
+      li(class="fragment") if (!exists) ?
+      li(class="fragment") if (err) ?
+      li(class="fragment") "Content-type" header'ı ? (npm repo mime-types)
+  section
+    h4 file-server-mw.js
+    hr
+    pre
+      code(class="js").
+        const serveStatic = require("serve-static");
+        const PUBLIC_FOLDER = "public";
+        const serve = serveStatic(PUBLIC_FOLDER);
+
+        http.createServer(function(req, res) {
+          const done = finalhandler(req, res);
+          serve(req, res, done);
+        }).listen(3000);
+    p(class="fragment") PUBLIC_FOLDER'ı değiştirerek, statik dosyaların nerede aranacağını belirleyebiliriz
+    p(class="fragment question") done() callback'ini vermezsek ve bulunamayan bir adres istersek (ör: localhost:3000/asd) ne oluyor?

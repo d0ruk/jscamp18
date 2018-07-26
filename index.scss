@@ -1,0 +1,91 @@
+@import "scss-flex/src/scss-flex.scss";
+@import "reveal.js/css/reveal.scss";
+@import "reveal.js/css/theme/source/night.scss";
+@import "highlight.js/styles/paraiso-dark";
+
+.reveal p {
+  font-size: 0.7em !important;
+}
+
+.reveal section {
+  img {
+    border: none !important;
+    background: none !important;
+  }
+
+  p {
+    text-align: left !important;
+    padding-left: 2em;
+  }
+
+  mark {
+    background-color: rgba(0, 255, 0, 0.3) !important;
+  }
+
+  ul {
+    list-style-type: kannada;
+
+    li {
+      font-size: 0.7em;
+      padding: 0.5em;
+    }
+  }
+
+  ol {
+    li {
+      font-size: 0.5em;
+    }
+  }
+
+  > span {
+    font-size: 0.5em !important;
+  }
+
+  pre {
+    code {
+      padding: 0.5em;
+    }
+  }
+
+  mark {
+    background-color: rgba(255, 255, 0, 0.5);
+    padding: 0 0.3em;
+    border-radius: 0.2em;
+  }
+
+  // https://alligator.io/css/transition-box-shadows/
+  .question {
+    padding: 0.5em;
+    transition: box-shadow 5s linear;
+    box-shadow: 0 0 10px 0 rgba(255, 0, 0, 0.7);
+    position: relative;
+    font-style: oblique;
+
+    &::before {
+      content: " " 1;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      box-shadow: 0 0 1em red;
+      opacity: 0;
+      transition: opacity 500ms;
+    }
+
+    &:hover::before {
+      opacity: 1;
+    }
+  }
+}
+
+.compact {
+  > * {
+    margin: 0.1em 0 !important;
+    padding: 0.3em !important;
+  }
+
+  p:not(.question) {
+    padding-left: 2em !important;    
+  }
+}
