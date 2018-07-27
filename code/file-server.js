@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const url = require("url");
 
+const debug = require("debug")("file-server");
 const mime = require("mime-types");
 
 const options = {
@@ -10,11 +11,10 @@ const options = {
 };
 
 const server = http.createServer(function(req, res) {
-  // debugger;
-  const parsedUrl = url.parse(req.url);
-  const filePath = `.${parsedUrl.pathname}`;
-  const ext = path.extname(filePath);
-  const contentType = mime.lookup(ext);
+  let { pathname } = url.parse(req.url);
+  if (pathname === "/") pathname += "index.html";
+  const filePath = `.${pathname}`;
+  debug("filePath: %s", filePath);
 
   fs.exists(filePath, exists => {
     if (!exists) {
@@ -23,19 +23,26 @@ const server = http.createServer(function(req, res) {
       return;
     }
 
-    let PATH = filePath;
-    // if (fs.statSync(filePath).isDirectory()) {
-      // PATH += `${path.sep}index${ext || ".html"}`;
-    // }
+    // gerçek hayatta, http handler (ya da herhangi bir callback) içinde sync metod kullanmayın
+    if (fs.statSync(filePath).isDirectory()) {
+      res.writeHead(302, { Location: `${filePath}${path.sep}index.html` });
+      res.end(); // redirect
+      return;
+    }
 
-    fs.readFile(PATH, (err, data) => {
+    const ext = path.extname(filePath);
+    const contentType = mime.lookup(ext) || "text/plain";
+
+    fs.readFile(filePath, (err, data) => {
       if (err) {
         res.statusCode = 500;
+        // client'a node.js hatalarını dönmeyin - yani bunu yapmayın
         res.end(`${filePath} could not be read: ${err.message}`);
-      } else {
-        res.setHeader("Content-type", contentType);
-        res.end(data);
       }
+
+      res.statusCode = 200;
+      res.setHeader("Content-type", contentType);
+      res.end(data);
     });
   });
 });

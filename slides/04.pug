@@ -93,6 +93,9 @@ section
         }
     p(class="fragment question") res.end() ile cevap dönmezsek ne oluyor?
     p(class="fragment question") logger(req, res, done) yaparsak ne oluyor?
+    aside(class="notes")
+      ul
+        li 
   section
     h4 file-server.js
     hr
@@ -116,6 +119,9 @@ section
       li(class="fragment") if (!exists) ?
       li(class="fragment") if (err) ?
       li(class="fragment") "Content-type" header'ı ? (npm repo mime-types)
+    aside(class="notes")
+      ul
+        li isDirectory() ise filePath'e index.html ekle
   section
     h4 file-server-mw.js
     hr

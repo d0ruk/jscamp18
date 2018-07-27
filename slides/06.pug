@@ -1,0 +1,37 @@
+section
+  section
+    h3 Server Side Rendering
+  section
+    p bir frontend framework'ü sunucuda çalışırken markup (html) üretebiliyorsa, SSR kabiliyeti vardır
+    p(class="fragment") app'iniz eğer hem sunucuda (SSR) hem de web'de (SPA) render() edebiliyorsa, universal app'dir
+    p(class="fragment") SSR için sunucunuzun yapması gereken, istemciye yollayacağı 
+      b html string'ini
+      |  oluşturmak
+    div(class="fragment")
+      h5 avantajları
+      p(class="fragment") SSR'da sunucu gösterime hazır bir html gönderiyor - SPA'da browser'ın bir şey gösterebilmesi için JS yüklemesi gerekiyor
+      p(class="fragment") SEO - arama motorlarının, app'inizin içeriğini görmek için JS'inizi çalıştırması gerek
+    aside(class="notes")
+      ul
+        li CSR'daki beyaz ekranı html içinde gönderilen loader'la çözülüyor
+  section
+    h5 dezavantajları
+      p html string'ini oluşturmak CPU harcayan ve bloklayan bir işlem
+      p(class="fragment") diyelim SSR için 250ms'ye ihtiyacınız var - saniyede 4 request'e cevap verebilirsiniz
+      p(class="fragment") production kalitesinde olması için response objesine stream(ler) bağlamanız gerekir
+      div(class="fragment")
+        hr
+        p burada yapacağımız SSR, konsepti öğrenme amaçlı
+        pre
+          code(class="js").
+            const ReactDOMServer = require('react-dom/server');
+            ReactDOMServer.renderToString(element);
+      p(class="fragment") amaç, app'inizi sunucuda render() ettikten (html oluşturduktan) sonra, istemci tarafında SPA'nın devralabilmesi
+  section
+    pre
+      code(class="js").
+        app.get("*", function(req, res) {
+          res.send("Hello World\n");
+        });
+    p(class="fragment question") /api router'ını geri getirmek için ne yapmalıyız?
+    

@@ -1,6 +1,8 @@
 section
   section
     img(src="img/express.png")
+    pre
+      code(class="sh") > npm docs express
   section
     h4 hello world
     hr
@@ -31,6 +33,29 @@ section
       ul
         li son handler'da next() yok
   section
+    p route path'ler (/api) 3 farklı şekilde belirlenebilir;
+    pre
+      code(class="js").
+        // string
+        app.get("/about", function (req, res) {});
+    pre(class="fragment")
+      code(class="js").
+        // string pattern - about & about
+        app.get("/abo?ut", function (req, res) {});
+    pre(class="fragment")
+      code(class="js").
+        // regular expression - .svg ile biten
+        app.get(/.svg$/, function (req, res) {});
+    div(class="fragment")
+      p URL'den parametre okumak için; ([A-Za-z0-9_]).
+      pre
+        code(class="js").
+          app.get("/users/:userId/books/:bookId", function(req, res) {
+            res.send(req.params);
+          });
+    p(class="fragment") GET http://localhost:3000/users/34/books/8989
+    p(class="fragment") req.params: { "userId": "34", "bookId": "8989" }
+  section
     h3 middleware ekleme
     hr
     p /api kapsamında olan bir middleware ekledik - global mw için;
@@ -41,18 +66,18 @@ section
           next();
         });
     pre
-      code(class="fragment js") app.use(express.static("public", options));
+      code(class="fragment js") app.use(express.static("public"));
       code(class="fragment js") app.use(morgan("combined"));
     div(class="compact")
       p(class="fragment") middleware'ların sırası önemli - tanımlandıkları sırayla işlenirler
-      p(class="fragment question") app.use() ile global olarak tanımladığımız mw'ı app.listen() öncesindeki satıra alırsak ne oluyor?
-      p(class="fragment question") /api route'u içinde tanımladığımız mw'ı son sıraya alırsak ne oluyor?
+      p(class="fragment question") app.use() ile global olarak tanımladığımız mw'i app.listen() öncesindeki satıra alırsak ne oluyor?
+      p(class="fragment question") /api altında tanımladığımız mw'i son sıraya alırsak ne oluyor?
     aside(class="notes")
       ul
         li
   section
-    p req.body objesi JSON ise, JSON.parse(req.body) yapmanız gerekir - there is a mw for that
-    pre
+    p POST request'in içeriği application/json ise, önce JSON.parse(req.body) yapmanız gerekir
+    pre(class="fragment")
       code(class="js") app.use(bodyParser.json());
     pre(class="fragment")
       code.
@@ -63,16 +88,109 @@ section
           res.json({ val: Number(val) * 2 });
         });
     div(class="fragment")
-      p eğer sunucu ile form-urlencoded haberleşeceksek;
+      p eğer Content-Type: application/x-www-form-urlencoded ise
       pre
         code(class="js") bodyParser.urlencoded({ extended: false });
+    p(class="fragment") JSON, raw, text ve url-encoded parse seçenekleri var
+    p(class="fragment") gelen request'teki Content-Type header'ına bakarak hangi parse stratejisini uygulayacağını belirliyor
     aside(class="notes")
       ul
-        li 
-
+        li bir app'te birden fazla parse etme stratejisi olabilir
+        li app.all("/api"...)
   section
     h3 express.Router
     hr
     ul
       li(class="fragment") mw'lar ve route'lardan (/api) oluşan, izole edilmiş bir mini express app
-      li(class="fragment") asda
+      li(class="fragment") app'iniz büyüdükçe modüllere ayırmanız gerekecek - en bariz olanı bir route altındaki işlemleri ayırmak
+      p(class="fragment question") MVC pattern nedir? Böyle bir projede nasıl uygularız?
+      pre(class="fragment")
+        code(class="js").
+          // ./controllers/posts.js
+          // ayrıca bir de postModel olmalı
+          exports.getAll = function(req, res) {};
+      pre(class="fragment")
+        code(class="js").
+          // ./routes/posts.js
+          router.get("/", posts_controller.getAll);
+  section
+    p ./routes/api.js
+    pre
+      code.
+        const router = express.Router();
+
+        router.get("/", function (req, res) {});
+        router.post("/", function (req, res) {});
+
+        module.exports = router;
+    div(class="fragment")
+      p sonrasında, ana modülünüzde;
+      pre
+        code(class="js").
+          const apiRoute = require("./routes/api.js");
+          app.use("/api", apiRoute);
+    div(class="fragment")
+      p(style="font-size:.5em!important") router'a özel mw tanımlamak app.use() kullanımı ile aynı - mini bir app'in global mw'i
+      pre
+        code.
+          router.use(function(req, res, next) {
+            console.log(`${req.method} - ${req.url}`);
+            next();
+          });
+  section
+    h3 db
+    hr
+    pre
+      code(class="sh") > npm repo level
+    pre(class="fragment")
+      code(class="js").
+        const options = { valueEncoding: "json" };
+        const db = level("./mydb", options);
+    pre(class="fragment")
+      code(class="js").
+        router.post("/", function(req, res) {
+          const { body, title } = req.body;
+          const id = uuid.v1();
+          const created = Date.now();
+
+          db.?1(?2, { id, body, title, created })
+            .then(() => db.?3(?2))
+            .then(post => { res.json(post); })
+        });
+    div(class="compact")
+      p(class="fragment question") bir objeyi silmek için hangi metodu kullanabiliriz?, db'de ne yaparız?
+      p(class="fragment question") router.get("/") handler'ının ne yapmasını bekleriz?
+  section
+    pre
+      code(class="js").
+        router.get("/", function(req, res) {
+          const stream = db.createValueStream();
+          const posts = [];
+
+          stream.on("data", data => { posts.push(data); });
+          stream.on("end", () => { res.json({ posts }) });
+        });
+    div(class="fragment question")
+      p Bu metod'ların handler'larını yazın - db işlemlerini .catch() etmeyi unutmayın
+      pre
+        code(class="js").
+          router.delete("/:id", function(req, res) {});
+          router.get("/:id", function(req, res) {});
+  section
+    h3 bağlantılar
+    hr
+    span
+      a(href="https://github.com/expressjs/express/wiki") wiki
+    br
+    span
+      a(href="https://github.com/expressjs/express/tree/master/examples") examples
+    br
+    span
+      a(href="https://developer.mozilla.org/en-US/docs/Learn/Server-side/Express_Nodejs") MDN - express.js tutorial
+    br
+    span
+      a(href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview") MDN - HTTP overview
+    br
+    span
+      a(href="https://github.com/rajikaimal/awesome-express") awesome express
+    br
