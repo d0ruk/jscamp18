@@ -6,12 +6,13 @@ const url = require("url");
 const debug = require("debug")("file-server");
 const mime = require("mime-types");
 
-const options = {
-  port: 3001
-};
+const options = { port: 3001 };
 
 const server = http.createServer(function(req, res) {
-  let { pathname } = url.parse(req.url);
+  const parsedUrl = url.parse(req.url);
+  debug("req.url: %j", parsedUrl);
+
+  let { pathname } = parsedUrl;
   if (pathname === "/") pathname += "index.html";
   const filePath = `.${pathname}`;
   debug("filePath: %s", filePath);
@@ -25,8 +26,16 @@ const server = http.createServer(function(req, res) {
 
     // gerçek hayatta, http handler (ya da herhangi bir callback) içinde sync metod kullanmayın
     if (fs.statSync(filePath).isDirectory()) {
-      res.writeHead(302, { Location: `${filePath}${path.sep}index.html` });
-      res.end(); // redirect
+      let Location;
+      if (filePath.endsWith("/")) {
+        Location = `${filePath}index.html`.slice(1);
+      } else {
+        Location = `${filePath}${path.sep}index.html`.slice(1);
+      }
+      debug("redirecting to %s", Location);
+
+      res.writeHead(302, { Location });
+      res.end();
       return;
     }
 
