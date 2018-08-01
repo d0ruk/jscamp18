@@ -19,7 +19,7 @@ function run() {
     // Determines where controls appear, "edges" or "bottom-right"
     controlsLayout: "bottom-right",
     controlsBackArrows: "faded",
-    progress: true,
+    progress: false,
     defaultTiming: 120,
     slideNumber: false,
     // Push each slide change to the browser history

@@ -6,6 +6,7 @@ const morgan = require("morgan");
 
 const logger = morgan("combined");
 const serve = serveStatic("folder");
+const PORT = 3000;
 
 http
   .createServer(function(req, res) {
@@ -16,4 +17,4 @@ http
       serve(req, res, done);
     });
   })
-  .listen(3000);
+  .listen(PORT, () => console.log("Listening on %s", PORT));

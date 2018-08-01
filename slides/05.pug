@@ -76,7 +76,7 @@ section
       ul
         li
   section
-    p POST request'in içeriği application/json ise, önce JSON.parse(req.body) yapmanız gerekir
+    p POST request'in içeriği application/json ise, önce JSON.parse(req.body) yapmanız gerekir. ya da;
     pre(class="fragment")
       code(class="js") app.use(bodyParser.json());
     pre(class="fragment")
@@ -158,7 +158,7 @@ section
             .then(post => { res.json(post); })
         });
     div(class="compact")
-      p(class="fragment question") bir objeyi silmek için hangi metodu kullanabiliriz?, db'de ne yaparız?
+      p(class="fragment question") bir objeyi silmek için hangi http metodunu kullanabiliriz? hangi db metodunu kullanırız?
       p(class="fragment question") router.get("/") handler'ının ne yapmasını bekleriz?
   section
     pre

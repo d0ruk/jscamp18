@@ -4,8 +4,11 @@ const finalhandler = require("finalhandler");
 const morgan = require("morgan");
 
 const logger = morgan("combined");
+const PORT = 3000;
 
-http.createServer(handler).listen(3000);
+http
+  .createServer(handler)
+  .listen(PORT, () => console.log("Listening on %s", PORT));
 
 function handler(req, res) {
   const done = finalhandler(req, res);

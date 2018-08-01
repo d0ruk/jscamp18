@@ -2,19 +2,20 @@
   "name": "@doruk/code",
   "version": "1.0.0",
   "description": "",
-  "main": "http-server.js",
   "scripts": {
     "start": "node express/index.js",
-    "build": "parcel build blog_app/index.js -d express/public"
+    "build": "parcel build blog_app/index.js -d express/public -o bundle.js",
+    "server": "NODE_ENV=production node express/bootstrap.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Doruk Kutlu",
+  "license": "MIT",
   "dependencies": {
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "express": "^4.16.3",
     "finalhandler": "^1.1.1",
+    "ignore-styles": "^5.0.1",
     "level": "^4.0.0",
     "mime-types": "^2.1.19",
     "morgan": "^1.9.0",
