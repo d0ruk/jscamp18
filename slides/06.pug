@@ -4,7 +4,7 @@ section
   section
     p bir frontend framework'ü sunucuda üzerinde (node.js) markup (html) üretebiliyorsa, SSR kabiliyeti vardır
     p(class="fragment") app'iniz eğer hem sunucuda (SSR) hem de web'de (SPA) render() edebiliyorsa, universal app'dir
-    p(class="fragment") SSR için sunucunuzun yapması gereken, istemciye yollayacağı 
+    p(class="fragment") SSR için sunucunuzun yapması gereken; SPA root komponentini, state'i için gereken datayla birlikte render edip (node.js üzerinde)  istemciye yollayacağı 
       b html string'ini
       |  oluşturmak
     div(class="fragment")
@@ -34,4 +34,3 @@ section
   //-         res.send("Hello World\n");
   //-       });
   //-   p(class="fragment question") /api router'ını geri getirmek için ne yapmalıyız?
-    

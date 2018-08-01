@@ -1,7 +1,7 @@
 {
   "name": "@doruk/jscamp18",
   "version": "1.0.0",
-  "description": "building a node.js server for API and SSR",
+  "description": "",
   "scripts": {
     "start": "npm run cp && run-p dev:*",
     "dev:js": "watchify index.js -o build/bundle.js -v",
